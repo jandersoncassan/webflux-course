@@ -1,0 +1,4 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://jandemax:u4V4UgAmbLtQ64vC@webfluxcourse.ceyztmz.mongodb.net/coursedb?retryWrites=true&w=majority&ssl=true
