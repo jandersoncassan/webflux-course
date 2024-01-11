@@ -33,7 +33,7 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<Mono<UserResponse>> findById(String id) {
 
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.ok()
                         .body(service.findById(id)
                                 .switchIfEmpty(Mono.error(
                                         new ObjectNotFoundException(
@@ -45,7 +45,9 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public ResponseEntity<Flux<UserResponse>> findAll() {
-        return null;
+
+        return ResponseEntity.ok()
+                .body(service.findAll().map(mapper::toResponse));
     }
 
     @Override
