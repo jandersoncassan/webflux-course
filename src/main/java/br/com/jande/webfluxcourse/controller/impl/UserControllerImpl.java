@@ -1,6 +1,7 @@
 package br.com.jande.webfluxcourse.controller.impl;
 
 import br.com.jande.webfluxcourse.controller.UserController;
+import br.com.jande.webfluxcourse.mapper.UserMapper;
 import br.com.jande.webfluxcourse.model.request.UserRequest;
 import br.com.jande.webfluxcourse.model.response.UserResponse;
 import br.com.jande.webfluxcourse.service.UserService;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class UserControllerImpl implements UserController {
 
     private final UserService service;
+    private final UserMapper mapper;
     @Override
     public ResponseEntity<Mono<Void>> save(UserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -25,8 +27,10 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Mono<UserResponse>> find(String id) {
-        return null;
+    public ResponseEntity<Mono<UserResponse>> findById(String id) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+                        .body(service.findById(id).map(mapper::toResponse));
     }
 
     @Override
