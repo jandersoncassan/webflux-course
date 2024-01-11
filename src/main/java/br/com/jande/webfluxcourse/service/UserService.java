@@ -4,10 +4,13 @@ import br.com.jande.webfluxcourse.entity.User;
 import br.com.jande.webfluxcourse.mapper.UserMapper;
 import br.com.jande.webfluxcourse.model.request.UserRequest;
 import br.com.jande.webfluxcourse.repository.UserRepository;
+import br.com.jande.webfluxcourse.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,18 @@ public class UserService {
 
     public Flux<User> findAll(){
         return repository.findAll();
+    }
+
+    public Mono<User> update(final String id, final UserRequest request){
+        return findById(id)
+                .switchIfEmpty(Mono.error(
+                        new ObjectNotFoundException(
+                                format("Object not found, Id: %s, Type: %s", id, User.class.getSimpleName())
+                        )
+                ))
+                .map(entity -> mapper.toEntity(request, entity))
+                .flatMap(repository::save);
+
     }
 
 

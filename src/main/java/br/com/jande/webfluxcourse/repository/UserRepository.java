@@ -1,6 +1,7 @@
 package br.com.jande.webfluxcourse.repository;
 
 import br.com.jande.webfluxcourse.entity.User;
+import br.com.jande.webfluxcourse.model.request.UserRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Repository;
@@ -23,4 +24,5 @@ public class UserRepository {
     public Flux<User> findAll() {
         return mongoTemplate.findAll(User.class);
     }
+
 }
