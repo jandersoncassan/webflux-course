@@ -33,7 +33,7 @@ class UserServiceTest {
     private UserService service;
 
     @Test
-    void save() {
+    void testSave() {
         UserRequest request = new UserRequest("Valdir", "email@email.com.br", "1234");
         User entity = User.builder().build();
 
@@ -47,5 +47,21 @@ class UserServiceTest {
                 .verify();
 
         Mockito.verify(repository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void testFindById(){
+        when(repository.findById(any())).thenReturn(Mono.just(User.builder()
+                        .id("1234")
+                .build()));
+
+        Mono<User> result = service.findById("123");
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getClass() == User.class
+                && user.getId().equals("1234"))
+                .expectComplete()
+                .verify();
+
+        Mockito.verify(repository, times(1)).findById(any());
     }
 }
