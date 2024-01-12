@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.cassandra.CassandraProperties;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -63,5 +64,21 @@ class UserServiceTest {
                 .verify();
 
         Mockito.verify(repository, times(1)).findById(any());
+    }
+
+    @Test
+    void testFindAll(){
+        when(repository.findAll()).thenReturn(Flux.just(User.builder()
+                .id("1234")
+                .build()));
+
+        Flux<User> result = service.findAll();
+        StepVerifier.create(result)
+                .expectNextMatches(user -> user.getClass() == User.class
+                        && user.getId().equals("1234"))
+                .expectComplete()
+                .verify();
+
+        Mockito.verify(repository, times(1)).findAll();
     }
 }
