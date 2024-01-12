@@ -4,6 +4,8 @@ import br.com.jande.webfluxcourse.entity.User;
 import br.com.jande.webfluxcourse.model.request.UserRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,4 +27,9 @@ public class UserRepository {
         return mongoTemplate.findAll(User.class);
     }
 
+    public Mono<User> findAndRemove(String id) {
+        Query query = new Query();
+        Criteria where = Criteria.where("id").is(id);
+        return mongoTemplate.findAndRemove(query.addCriteria(where), User.class);
+    }
 }

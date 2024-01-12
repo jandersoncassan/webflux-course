@@ -42,5 +42,16 @@ public class UserService {
 
     }
 
+    public Mono<User> delete(final String id){
+        return handlerNotFound(repository.findAndRemove(id), id);
+    }
+
+    private <T> Mono<T> handlerNotFound(Mono<T> mono, String id){
+        return mono.switchIfEmpty(Mono.error(
+                new ObjectNotFoundException(
+                        format("Object not found, Id: %s, Type: %s", id, User.class.getSimpleName())
+                ))
+        );
+    }
 
 }
