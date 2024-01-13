@@ -3,6 +3,7 @@ package br.com.jande.webfluxcourse.controller;
 import br.com.jande.webfluxcourse.entity.User;
 import br.com.jande.webfluxcourse.mapper.UserMapper;
 import br.com.jande.webfluxcourse.model.request.UserRequest;
+import br.com.jande.webfluxcourse.model.response.UserResponse;
 import br.com.jande.webfluxcourse.service.UserService;
 import com.mongodb.reactivestreams.client.MongoClient;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +39,12 @@ class UserControllerImplTest {
 
     @MockBean
     private UserService service;
+
+    @MockBean
+    private MongoClient mongoClient;
+
+    @MockBean
+    private UserMapper mapper;
 
     @Test
     @DisplayName("Test endpoint save with success")
@@ -77,8 +84,28 @@ class UserControllerImplTest {
     }
 
     @Test
-    void findById() {
+    @DisplayName("Test endpoint findById with success")
+    void testindByIdWithSuccess() {
+        final var response = new UserResponse("123456789", "Jande", "jande.max@teste.com.br", "123456");
+
+        when(service.findById(anyString())).thenReturn(Mono.just(User.builder().build()));
+        when(mapper.toResponse(any(User.class))).thenReturn(response);
+
+        webTestClient.get()
+                .uri("/users/"+123456789)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo("123456789")
+                .jsonPath("$.name").isEqualTo("Jande")
+                .jsonPath("$.email").isEqualTo("jande.max@teste.com.br")
+                .jsonPath("$.password").isEqualTo("123456");
+
+        verify(service, times(1)).findById(anyString());
+
     }
+
 
     @Test
     void findAll() {
