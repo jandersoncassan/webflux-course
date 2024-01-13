@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -81,4 +82,23 @@ class UserServiceTest {
 
         Mockito.verify(repository, times(1)).findAll();
     }
+
+    @Test
+    void testUpdate(){
+        UserRequest request = new UserRequest("Valdir", "email@email.com.br", "1234");
+        User entity = User.builder().build();
+
+        when(mapper.toEntity(any(UserRequest.class), any(User.class))).thenReturn(entity);
+        when(repository.findById(anyString())).thenReturn(Mono.just(entity));
+        when(repository.save(any())).thenReturn(Mono.just(entity));
+
+        Mono<User> result = service.update("1234", request);
+        StepVerifier.create(result)
+                .expectNextMatches(Objects::nonNull)
+                .expectComplete()
+                .verify();
+
+        Mockito.verify(repository, times(1)).save(any(User.class));
+    }
+
 }
