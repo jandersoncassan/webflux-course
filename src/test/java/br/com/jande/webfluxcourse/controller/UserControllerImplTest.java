@@ -5,6 +5,7 @@ import br.com.jande.webfluxcourse.mapper.UserMapper;
 import br.com.jande.webfluxcourse.model.request.UserRequest;
 import br.com.jande.webfluxcourse.model.response.UserResponse;
 import br.com.jande.webfluxcourse.service.UserService;
+import br.com.jande.webfluxcourse.service.exception.ObjectNotFoundException;
 import com.mongodb.reactivestreams.client.MongoClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -128,14 +129,61 @@ class UserControllerImplTest {
                 .jsonPath("$.[0].password").isEqualTo("123456");
 
         verify(service, times(1)).findAll();
+        verify(mapper).toResponse(any(User.class));
 
     }
 
     @Test
+    @DisplayName("Test endpoint update with success")
     void update() {
+
+        final var request = new UserRequest("Jandera", "jande.max@teste.com.br", "123456");
+        final var response = new UserResponse("123456789", "Jande", "jande.max@teste.com.br", "123456");
+
+        when(service.update(anyString(), any(UserRequest.class))).thenReturn(Mono.just(User.builder().build()));
+        when(mapper.toResponse(any(User.class))).thenReturn(response);
+
+        webTestClient.patch()
+                .uri("/users/"+"123456789")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(request))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo("123456789")
+                .jsonPath("$.name").isEqualTo("Jande")
+                .jsonPath("$.email").isEqualTo("jande.max@teste.com.br")
+                .jsonPath("$.password").isEqualTo("123456");
+
+        verify(service, times(1)).update(anyString(), any(UserRequest.class));
+        verify(mapper).toResponse(any(User.class)); //default time() = 1
     }
 
     @Test
+    @DisplayName("Test endpoint delete with success")
     void delete() {
+
+        when(service.delete(anyString())).thenReturn(Mono.just(User.builder().build()));
+
+        webTestClient.delete()
+                .uri("/users/"+"123456789")
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(service, times(1)).delete(anyString());
+    }
+
+    @Test
+    @DisplayName("Test endpoint delete with not found")
+    void testDeleteThrownsObjectNootFound() {
+
+        when(service.delete(anyString())).thenThrow(new ObjectNotFoundException("user not found"));
+
+        webTestClient.delete()
+                .uri("/users/"+"123456789")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(service, times(1)).delete(anyString());
     }
 }
