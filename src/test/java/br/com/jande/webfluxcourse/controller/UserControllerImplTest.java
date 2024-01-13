@@ -22,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -108,7 +109,26 @@ class UserControllerImplTest {
 
 
     @Test
+    @DisplayName("Test endpoint findAll with success")
     void findAll() {
+        final var response = new UserResponse("123456789", "Jande", "jande.max@teste.com.br", "123456");
+
+        when(service.findAll()).thenReturn(Flux.just(User.builder().build()));
+        when(mapper.toResponse(any(User.class))).thenReturn(response);
+
+        webTestClient.get()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.[0].id").isEqualTo("123456789")
+                .jsonPath("$.[0].name").isEqualTo("Jande")
+                .jsonPath("$.[0].email").isEqualTo("jande.max@teste.com.br")
+                .jsonPath("$.[0].password").isEqualTo("123456");
+
+        verify(service, times(1)).findAll();
+
     }
 
     @Test
