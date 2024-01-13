@@ -175,7 +175,7 @@ class UserControllerImplTest {
 
     @Test
     @DisplayName("Test endpoint delete with not found")
-    void testDeleteThrownsObjectNootFound() {
+    void testDeleteThrownsObjectNotFound() {
 
         when(service.delete(anyString())).thenThrow(new ObjectNotFoundException("user not found"));
 
