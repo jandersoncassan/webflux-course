@@ -4,6 +4,7 @@ import br.com.jande.webfluxcourse.entity.User;
 import br.com.jande.webfluxcourse.mapper.UserMapper;
 import br.com.jande.webfluxcourse.model.request.UserRequest;
 import br.com.jande.webfluxcourse.repository.UserRepository;
+import br.com.jande.webfluxcourse.service.exception.ObjectNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import reactor.test.StepVerifier;
 
 import java.util.Objects;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -100,5 +102,33 @@ class UserServiceTest {
 
         Mockito.verify(repository, times(1)).save(any(User.class));
     }
+
+    @Test
+    void testDelete(){
+
+        when(repository.findAndRemove(anyString())).thenReturn(Mono.just(User.builder().build()));
+
+        Mono<User> result = service.delete("1234");
+        StepVerifier.create(result)
+                .expectNextMatches(Objects::nonNull)
+                .expectComplete()
+                .verify();
+
+        Mockito.verify(repository, times(1)).findAndRemove(anyString());
+    }
+
+    @Test
+    void testHandleNotFound(){
+        when(repository.findById(anyString())).thenReturn(Mono.empty());
+
+        try {
+            service.findById("1234").block();
+        }catch (Exception ex){
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals( format("Object not found, Id: %s, Type: %s", "1234", User.class.getSimpleName()), ex.getMessage());
+        }
+    }
+
+
 
 }
